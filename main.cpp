@@ -75,7 +75,7 @@ static bool RunPE(ttstr path)
 	}
 
 	// check if valid pe file
-	pinh = (PIMAGE_NT_HEADERS)((DWORD)data + pidh->e_lfanew);
+	pinh = (PIMAGE_NT_HEADERS)((ULONG_PTR)data + pidh->e_lfanew);
 	if (pinh->Signature != IMAGE_NT_SIGNATURE)
 	{
 		TVPAddImportantLog(TVPFormatMessage(TJS_W("krselfload: PE signature error: %1"), (tjs_int)GetLastError()));
@@ -139,9 +139,9 @@ static bool RunPE(ttstr path)
 	for (int i = 0; i < pinh->FileHeader.NumberOfSections; i++)
 	{
 		// calculate section header of each section
-		pish = (PIMAGE_SECTION_HEADER)((DWORD)data + pidh->e_lfanew + sizeof (IMAGE_NT_HEADERS) + sizeof (IMAGE_SECTION_HEADER) * i);
+		pish = (PIMAGE_SECTION_HEADER)((ULONG_PTR)data + pidh->e_lfanew + sizeof (IMAGE_NT_HEADERS) + sizeof (IMAGE_SECTION_HEADER) * i);
 		// write section data into memory
-		if (WriteProcessMemory(pi.hProcess, (PVOID)(pinh->OptionalHeader.ImageBase + pish->VirtualAddress), (LPVOID)((DWORD)data + pish->PointerToRawData), pish->SizeOfRawData, NULL) == FALSE)
+		if (WriteProcessMemory(pi.hProcess, (PVOID)(pinh->OptionalHeader.ImageBase + pish->VirtualAddress), (LPVOID)((ULONG_PTR)data + pish->PointerToRawData), pish->SizeOfRawData, NULL) == FALSE)
 		{
 			tjs_int last_error = GetLastError();
 			if (last_error == 87)
@@ -157,7 +157,12 @@ static bool RunPE(ttstr path)
 	}
 
 	// set starting address at virtual address: address of entry point
+#ifdef _WIN64
+	context.Rcx = pinh->OptionalHeader.ImageBase + pinh->OptionalHeader.AddressOfEntryPoint;
+#else
 	context.Eax = pinh->OptionalHeader.ImageBase + pinh->OptionalHeader.AddressOfEntryPoint;
+#endif
+	
 	if (SetThreadContext(pi.hThread, &context) == FALSE)
 	{
 		TVPAddImportantLog(TVPFormatMessage(TJS_W("krselfload: Set thread context error: %1"), (tjs_int)GetLastError()));
