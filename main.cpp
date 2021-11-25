@@ -27,6 +27,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD Reason, LPVOID lpReserved)
 
 static bool RunPE(ttstr path)
 {
+#if defined(_M_IX86) || defined(_M_X64) || defined(_M_AMD64)
 	// PE headers
 	PIMAGE_DOS_HEADER pidh;
 	PIMAGE_NT_HEADERS pinh;
@@ -192,6 +193,8 @@ static bool RunPE(ttstr path)
 
     TerminateProcess(GetCurrentProcess(), exitcode);
 	return true;
+#endif
+	return false;
 }
 
 
