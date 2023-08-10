@@ -170,6 +170,14 @@ extern "C" __declspec(dllexport) HRESULT __stdcall V2Link(iTVPFunctionExporter *
 		}
 	}
 
+	{
+		const tjs_char name_krselfload[] = TJS_W("krselfload.tjs");
+		if (TVPIsExistentStorage(name_krselfload))
+		{
+			TVPExecuteStorage(name_krselfload, NULL, false, TJS_W(""));
+		}
+	}
+
 	return S_OK;
 }
 
