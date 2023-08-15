@@ -7,7 +7,11 @@
 //                                         //
 /////////////////////////////////////////////
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
+#include <objidl.h>
 #include "tp_stub.h"
 
 static HMODULE this_hmodule = NULL;
